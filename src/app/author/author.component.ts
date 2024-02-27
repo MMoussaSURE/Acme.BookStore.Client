@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ListService, PagedResultDto } from '@abp/ng.core';
-import { AuthorService, AuthorDto } from '@proxy/authors';
+import { AuthorService, AuthorDto, CreateAuthorDto, UpdateAuthorDto } from '@proxy/authors';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
@@ -19,7 +19,7 @@ export class AuthorComponent implements OnInit {
   form: FormGroup;
 
   selectedAuthor = {} as AuthorDto;
-
+  photoFile: File | null = null;
   constructor(
     public readonly list: ListService,
     private authorService: AuthorService,
@@ -52,6 +52,7 @@ export class AuthorComponent implements OnInit {
   buildForm() {
     this.form = this.fb.group({
       name: [this.selectedAuthor.name || '', Validators.required],
+      shortBio: [this.selectedAuthor.shortBio],
       birthDate: [
         this.selectedAuthor.birthDate ? new Date(this.selectedAuthor.birthDate) : null,
         Validators.required,
@@ -59,26 +60,41 @@ export class AuthorComponent implements OnInit {
     });
   }
 
-  save() {
+  async save() {
     if (this.form.invalid) {
       return;
     }
 
     if (this.selectedAuthor.id) {
+      const updateAuthorDto: UpdateAuthorDto = {
+        name: this.form.value.name,
+        birthDate: this.form.value.birthDate,
+        shortBio: this.form.value.shortBio,
+        image: this.photoFile ? await this.convertImageToBase64(this.photoFile) : null
+      };
+
       this.authorService
-        .update(this.selectedAuthor.id, this.form.value)
+        .update(this.selectedAuthor.id, updateAuthorDto)
         .subscribe(() => {
           this.isModalOpen = false;
           this.form.reset();
           this.list.get();
         });
     } else {
-      this.authorService.create(this.form.value).subscribe(() => {
+      const createAuthorDto: CreateAuthorDto = {
+        name: this.form.value.name,
+        birthDate: this.form.value.birthDate,
+        shortBio: this.form.value.shortBio,
+        image: this.photoFile ? await this.convertImageToBase64(this.photoFile) : null
+      };
+      this.authorService.create(createAuthorDto).subscribe(() => {
         this.isModalOpen = false;
         this.form.reset();
         this.list.get();
       });
     }
+
+    
   }
 
   delete(id: string) {
@@ -88,5 +104,22 @@ export class AuthorComponent implements OnInit {
             this.authorService.delete(id).subscribe(() => this.list.get());
           }
 	    });
+  }
+
+  async convertImageToBase64(image: File): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = error => reject(error);
+      reader.readAsDataURL(image);
+    });
+  }
+  onPhotoChange(event: any) {
+    if (event.target.files.length > 0) {
+     console.log("photo passed");
+      this.photoFile = event.target.files[0] as File;
+    }
   }
 }
