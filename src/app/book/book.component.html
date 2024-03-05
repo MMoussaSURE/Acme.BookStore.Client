@@ -72,6 +72,21 @@
   </div>
 </div>
 
+<div class="card">
+
+  <div *ngFor="let msg of receivedMessages" class="message">
+    {{ msg }}
+  </div>
+  
+  <div>
+    <input type="text" [(ngModel)]="targetUserName" placeholder="Target User">
+    <input type="text" [(ngModel)]="message" placeholder="Message">
+    <button (click)="sendMessage()">Send</button>
+  </div>
+ 
+
+</div>
+
 
 <!-- Add the modal here -->
 <abp-modal [(visible)]="isModalOpen">

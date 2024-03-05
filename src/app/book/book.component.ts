@@ -6,6 +6,7 @@ import { NgbDateNativeAdapter, NgbDateAdapter } from '@ng-bootstrap/ng-bootstrap
 import { ConfirmationService, Confirmation } from '@abp/ng.theme.shared';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { MessagingService } from '../services/messaging.service';
 
 @Component({
   selector: 'app-book',
@@ -25,12 +26,15 @@ export class BookComponent implements OnInit {
   bookTypes = bookTypeOptions;
 
   isModalOpen = false;
-
+  targetUserName: string;
+  message: string;
+  receivedMessages: string[] = [];
   constructor(
     public readonly list: ListService,
     private bookService: BookService,
     private fb: FormBuilder,
-    private confirmation: ConfirmationService
+    private confirmation: ConfirmationService,
+    private messagingService: MessagingService
   ) {
     this.authors$ = bookService.getAuthorLookup().pipe(map((r) => r.items));
   }
@@ -41,6 +45,17 @@ export class BookComponent implements OnInit {
     this.list.hookToQuery(bookStreamCreator).subscribe((response) => {
       this.book = response;
     });
+    this.messagingService.startConnection();
+    this.messagingService.receiveMessage();
+    this.messagingService.receivedMessage$.subscribe(message => {
+      this.receivedMessages.push(message);
+    });
+  }
+
+
+  sendMessage(): void {
+    this.messagingService.sendMessage(this.targetUserName, this.message);
+    this.message = '';
   }
 
   createBook() {
