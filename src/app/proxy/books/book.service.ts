@@ -43,6 +43,14 @@ export class BookService {
     { apiName: this.apiName,...config });
   
 
+  getFromCacheByBookId = (bookId: string, config?: Partial<Rest.Config>) =>
+    this.restService.request<any, BookDto>({
+      method: 'GET',
+      url: `/api/app/book/from-cache/${bookId}`,
+    },
+    { apiName: this.apiName,...config });
+  
+
   getList = (input: PagedAndSortedResultRequestDto, config?: Partial<Rest.Config>) =>
     this.restService.request<any, PagedResultDto<BookDto>>({
       method: 'GET',
