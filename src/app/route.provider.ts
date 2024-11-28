@@ -23,6 +23,13 @@ function configureRoutes(routesService: RoutesService) {
         layout: eLayoutType.application,
       },
       {
+        path: '/clients',
+        name: '::Menu:Clients',
+        parentName: '::Menu:BookStore',
+        layout: eLayoutType.application,
+        requiredPolicy: 'BookStore.Clients',
+      },
+      {
         path: '/books',
         name: '::Menu:Books',
         parentName: '::Menu:BookStore',
@@ -35,6 +42,19 @@ function configureRoutes(routesService: RoutesService) {
         parentName: '::Menu:BookStore',
         layout: eLayoutType.application,
         requiredPolicy: 'BookStore.Authors',
+      },
+      {
+        path: '/orders',
+        name: '::Menu:Orders',
+        parentName: '::Menu:BookStore',
+        layout: eLayoutType.application,
+        requiredPolicy: 'BookStore.Orders',
+      },
+      {
+        path: '/chat',
+        name: '::Menu:chat',
+        parentName: '::Menu:BookStore',
+        layout: eLayoutType.application,
       },
     ]);
   };
